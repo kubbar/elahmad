@@ -1,14 +1,14 @@
 {
-    "name": "rotana",
-    "version": "1.0.0",
-    "main": "index.js",
-    "scripts": {
-        "start": "node index.js"
-    },
-    "dependencies": {
-        "@sparticuz/chromium": "^130.0.0",
-        "express": "^4.21.1",
-        "puppeteer-core": "^23.9.0",
-        "vercel": "^38.0.0"
-    }
+  "name": "elahmad",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^130.0.0",
+    "express": "^4.21.1",
+    "puppeteer-core": "^23.9.0",
+    "vercel": "^38.0.0"
+  }
 }
