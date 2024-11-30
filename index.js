@@ -48,21 +48,6 @@ app.get('/:channel', async (req, res) => {
       }
     });
 
-    // إعداد الكوكيز والهيدر
-    await page.setCookie({
-      name: 'PHPSESSID',
-      value: 'paohg4ujlm07u292s8lckvl9tj',
-      domain: 'www.elahmad.com'
-    });
-    await page.setExtraHTTPHeaders({
-      'Origin': 'https://www.elahmad.com',
-      'Referer': `https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`,
-      'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"Windows"',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, مثل Gecko) Chrome/131.0.0.0 Safari/537.36'
-    });
-
     let streamingLink = null;
     const streamingLinkPromise = new Promise((resolve) => {
       page.on('response', async (response) => {
@@ -73,52 +58,10 @@ app.get('/:channel', async (req, res) => {
       });
     });
 
-    // بيانات البوست
-    const postData = {
-      licType: 'rmp',
-      licenseKey: 'Kl8lYWVvPTNla2Nza3YyNzk/cm9tNWRhc2lzMzBkYjBBJV8q',
-      hostname: 'elahmad.com',
-      version: '9.15.16',
-      cs: '10040'
-    };
-
-    await page.goto(`https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`, {
+    await page.goto(`https://rotana.net/en/channels/#/live/${channel}`, {
       waitUntil: 'domcontentloaded',
       timeout: 35000
     });
-
-    // إرسال طلب البوست
-    await page.evaluate((postData) => {
-      return fetch('https://www.elahmad.com/tv/embed/radiant/increment.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryrBNuE3BGOEoDOwUF'
-        },
-        body: `
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="licType"
-
-        ${postData.licType}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="licenseKey"
-
-        ${postData.licenseKey}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="hostname"
-
-        ${postData.hostname}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="version"
-
-        ${postData.version}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="cs"
-
-        ${postData.cs}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF--
-        `
-      });
-    }, postData);
 
     streamingLink = await streamingLinkPromise;
 
