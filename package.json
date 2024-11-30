@@ -9,6 +9,6 @@
     "@sparticuz/chromium": "^130.0.0",
     "express": "^4.21.1",
     "puppeteer-core": "^23.9.0",
-    "vercel": "^38.0.0"
+    "vercel": "^32.3.0"
   }
 }
