@@ -94,9 +94,23 @@ app.get('/:channel', async (req, res) => {
 
     if (streamingLink) {
       console.log('Streaming Link:', streamingLink);
-      // إرسال رابط البروكسي للمتصفح
-      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(streamingLink)}`;
-      return res.status(200).json({ streamingLink: proxyUrl });
+      // فك تشفير الرابط وتعديله بشكل صحيح
+      const decodedStreamingLink = decodeURIComponent(streamingLink);
+      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(decodedStreamingLink)}`;
+      console.log('Proxy URL:', proxyUrl);
+
+      // التحقق من صحة الرابط
+      try {
+        const response = await axios.get(proxyUrl);
+        if (response.status === 200) {
+          return res.status(200).json({ streamingLink: proxyUrl });
+        } else {
+          return res.status(404).json({ error: 'Streaming link is invalid' });
+        }
+      } catch (error) {
+        console.error('Error validating streaming link:', error);
+        return res.status(500).json({ error: 'Error validating streaming link' });
+      }
     } else {
       console.log('No streaming link found for channel:', channel);
       return res.status(404).json({ error: 'No streaming link found' });
