@@ -91,8 +91,8 @@ app.get('/:channel', async (req, res) => {
       console.log('Streaming Link:', streamingLink);
 
       // إنشاء رابط البروكسي بدون رموز غير مفهومة
-      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${streamingLink}`;
-      return res.status(200).json({ streamingLink: proxyUrl });
+      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(streamingLink)}`;
+      return res.status(200).json({ streamingLink: decodeURIComponent(proxyUrl) });
     } else {
       console.log('No streaming link found for channel:', channel);
       return res.status(404).json({ error: 'No streaming link found' });
