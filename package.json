@@ -10,6 +10,7 @@
         "axios": "^1.7.8",
         "chrome-remote-interface": "^0.33.2",
         "express": "^4.21.1",
+        "http-proxy": "^1.18.1",
         "http-proxy-middleware": "^3.0.3",
         "puppeteer-core": "^23.9.0",
         "puppeteer-extra": "^3.3.6",

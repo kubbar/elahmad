@@ -10,6 +10,9 @@ puppeteer.use(StealthPlugin());
 const app = express();
 const port = process.env.PORT || 3000;
 
+// قائمة عناوين IP الثابتة الصادرة
+const staticIPs = ['52.41.36.82', '54.191.253.12', '44.226.122.3'];
+
 app.use('/proxy', createProxyMiddleware({
   target: '',
   changeOrigin: true,
@@ -17,6 +20,7 @@ app.use('/proxy', createProxyMiddleware({
     const targetUrl = decodeURIComponent(req.query.target);
     proxyReq.setHeader('Referer', 'https://www.elahmad.com');
     proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
+    proxyReq.setHeader('X-Forwarded-For', staticIPs[Math.floor(Math.random() * staticIPs.length)]); // تعيين عنوان IP ثابت عشوائي من القائمة
     proxyReq.path = targetUrl;
   },
   router: (req) => decodeURIComponent(req.query.target),
@@ -104,7 +108,7 @@ app.get('/:channel', async (req, res) => {
       console.log('Streaming Link:', streamingLink);
       // فك تشفير الرابط وتعديله بشكل صحيح
       const decodedStreamingLink = decodeURIComponent(streamingLink);
-      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${decodedStreamingLink}`;
+      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(decodedStreamingLink)}`;
       console.log('Proxy URL:', proxyUrl);
 
       return res.status(200).json({ streamingLink: proxyUrl });
@@ -115,6 +119,11 @@ app.get('/:channel', async (req, res) => {
   } catch (error) {
     console.error('Error in API route:', error);
     return res.status(500).json({ error: 'An error occurred while fetching channel data' });
+  } finally {
+    if (browser) {
+      await browser.close();
+      console.log('Browser closed.');
+    }
   }
 });
 
