@@ -1,46 +1,64 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const axios = require('axios');
+const puppeteer = require('puppeteer-extra');
 const chromium = require('@sparticuz/chromium');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+puppeteer.use(StealthPlugin());
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// الحفاظ على جلسة المتصفح
+let browser;
 
 app.get('/:channel', async (req, res) => {
   const { channel } = req.params;
 
   if (!channel || typeof channel !== 'string') {
+    console.log('Invalid channel parameter:', channel);
     return res.status(400).json({ error: 'Channel parameter is required' });
   }
 
-  let browser = null;
   try {
-    browser = await puppeteer.launch({
-      args: [
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--disable-extensions',
-        '--disable-background-networking',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-sync',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-first-run',
-        '--safebrowsing-disable-auto-update'
-      ],
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
-    });
+    if (!browser) {
+      console.log('Launching browser...');
+      browser = await puppeteer.launch({
+        args: [
+          ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
+          '--disable-extensions',
+          '--disable-background-networking',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-sync',
+          '--metrics-recording-only',
+          '--mute-audio',
+          '--no-first-run',
+          '--safebrowsing-disable-auto-update'
+        ],
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      });
+
+      console.log('Browser launched.');
+    }
 
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
 
+    let streamingLinkFound = false;
+
     await page.setRequestInterception(true);
     page.on('request', (request) => {
+      if (streamingLinkFound) {
+        request.abort(); // إيقاف الطلبات بعد العثور على الرابط
+        return;
+      }
       if (['image', 'stylesheet', 'font', 'media', 'other'].includes(request.resourceType())) {
         request.abort();
       } else {
@@ -48,83 +66,37 @@ app.get('/:channel', async (req, res) => {
       }
     });
 
-    // إعداد الكوكيز والهيدر
-    await page.setCookie({
-      name: 'PHPSESSID',
-      value: 'paohg4ujlm07u292s8lckvl9tj',
-      domain: 'www.elahmad.com'
-    });
-    await page.setExtraHTTPHeaders({
-      'Origin': 'https://www.elahmad.com',
-      'Referer': `https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`,
-      'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"Windows"',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, مثل Gecko) Chrome/131.0.0.0 Safari/537.36'
-    });
+    console.log('Page interception set.');
 
     let streamingLink = null;
     const streamingLinkPromise = new Promise((resolve) => {
       page.on('response', async (response) => {
         const url = response.url();
-        if (url.includes('.m3u8') && !url.includes('stat.kwikmotion.com')) {
+        if (url.includes('.m3u8') && !url.includes('stat.kwikmotion.com') && !streamingLinkFound) {
+          streamingLinkFound = true; // إيقاف البحث بعد العثور على الرابط
+          console.log('Found streaming link:', url);
           resolve(url);
+          // إيقاف الاعتراض بعد العثور على الرابط
+          page.removeAllListeners('request');
         }
       });
     });
 
-    // بيانات البوست
-    const postData = {
-      licType: 'rmp',
-      licenseKey: 'Kl8lYWVvPTNla2Nza3YyNzk/cm9tNWRhc2lzMzBkYjBBJV8q',
-      hostname: 'elahmad.com',
-      version: '9.15.16',
-      cs: '10040'
-    };
-
+    console.log(`Navigating to https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`);
     await page.goto(`https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`, {
       waitUntil: 'domcontentloaded',
       timeout: 35000
     });
 
-    // إرسال طلب البوست
-    await page.evaluate((postData) => {
-      return fetch('https://www.elahmad.com/tv/embed/radiant/increment.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryrBNuE3BGOEoDOwUF'
-        },
-        body: `
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="licType"
-
-        ${postData.licType}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="licenseKey"
-
-        ${postData.licenseKey}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="hostname"
-
-        ${postData.hostname}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="version"
-
-        ${postData.version}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF
-        Content-Disposition: form-data; name="cs"
-
-        ${postData.cs}
-        ------WebKitFormBoundaryrBNuE3BGOEoDOwUF--
-        `
-      });
-    }, postData);
+    console.log('Page loaded.');
 
     streamingLink = await streamingLinkPromise;
 
     if (streamingLink) {
       console.log('Streaming Link:', streamingLink);
-      return res.status(200).json({ streamingLink });
+      // إرسال رابط البروكسي للمتصفح
+      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(streamingLink)}`;
+      return res.status(200).json({ streamingLink: proxyUrl });
     } else {
       console.log('No streaming link found for channel:', channel);
       return res.status(404).json({ error: 'No streaming link found' });
@@ -135,7 +107,26 @@ app.get('/:channel', async (req, res) => {
   } finally {
     if (browser) {
       await browser.close();
+      console.log('Browser closed.');
     }
+  }
+});
+
+app.get('/proxy', async (req, res) => {
+  const targetUrl = decodeURIComponent(req.query.target);
+  try {
+    const response = await axios.get(targetUrl, {
+      responseType: 'stream',
+      headers: {
+        'Referer': 'https://www.elahmad.com',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36'
+      }
+    });
+    res.setHeader('Content-Type', response.headers['content-type']);
+    response.data.pipe(res);
+  } catch (error) {
+    console.error('Error in proxy route:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
