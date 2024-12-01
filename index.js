@@ -58,9 +58,9 @@ app.get('/:channel', async (req, res) => {
       });
     });
 
-    await page.goto(`https://rotana.net/en/channels/#/live/${channel}`, {
+    await page.goto(`https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`, {
       waitUntil: 'domcontentloaded',
-      timeout: 35000
+      timeout: 30000
     });
 
     streamingLink = await streamingLinkPromise;
