@@ -11,7 +11,7 @@
         "chrome-remote-interface": "*",
         "express": "^4.21.1",
         "http-proxy": "*",
-        "http-proxy-middleware": "*",
+        "http-proxy-middleware": "^3.0.3",
         "puppeteer-core": "*",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin-stealth": "^2.11.2",
