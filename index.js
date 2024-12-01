@@ -104,7 +104,7 @@ app.get('/:channel', async (req, res) => {
       console.log('Streaming Link:', streamingLink);
       // فك تشفير الرابط وتعديله بشكل صحيح
       const decodedStreamingLink = decodeURIComponent(streamingLink);
-      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(decodedStreamingLink)}`;
+      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${decodedStreamingLink}`;
       console.log('Proxy URL:', proxyUrl);
 
       return res.status(200).json({ streamingLink: proxyUrl });
