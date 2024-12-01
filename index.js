@@ -10,9 +10,6 @@ puppeteer.use(StealthPlugin());
 const app = express();
 const port = process.env.PORT || 3000;
 
-// قائمة عناوين IP الثابتة الصادرة
-const staticIPs = ['52.41.36.82', '54.191.253.12', '44.226.122.3'];
-
 app.use('/proxy', createProxyMiddleware({
   target: '',
   changeOrigin: true,
@@ -20,7 +17,6 @@ app.use('/proxy', createProxyMiddleware({
     const targetUrl = decodeURIComponent(req.query.target);
     proxyReq.setHeader('Referer', 'https://www.elahmad.com');
     proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
-    proxyReq.setHeader('X-Forwarded-For', staticIPs[Math.floor(Math.random() * staticIPs.length)]); // تعيين عنوان IP ثابت عشوائي من القائمة
     proxyReq.path = targetUrl;
   },
   router: (req) => decodeURIComponent(req.query.target),
@@ -34,9 +30,10 @@ app.get('/:channel', async (req, res) => {
     return res.status(400).json({ error: 'Channel parameter is required' });
   }
 
+  let browser = null;
   try {
     console.log('Launching browser...');
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       args: [
         ...chromium.args,
         '--no-sandbox',
