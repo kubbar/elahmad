@@ -6,15 +6,15 @@
         "start": "node index.js"
     },
     "dependencies": {
-        "@sparticuz/chromium": "^131.0.1",
-        "axios": "^1.7.8",
-        "chrome-remote-interface": "^0.33.2",
-        "express": "^4.21.1",
-        "http-proxy": "^1.18.1",
-        "http-proxy-middleware": "^3.0.3",
-        "puppeteer-core": "^23.9.0",
-        "puppeteer-extra": "^3.3.6",
-        "puppeteer-extra-plugin-stealth": "^2.11.2",
-        "vercel": "^39.1.2"
+        "@sparticuz/chromium": "*",
+        "axios": "*",
+        "chrome-remote-interface": "*",
+        "express": "*",
+        "http-proxy": "*",
+        "http-proxy-middleware": "*",
+        "puppeteer-core": "*",
+        "puppeteer-extra": "*",
+        "puppeteer-extra-plugin-stealth": "*",
+        "vercel": "*"
     }
 }

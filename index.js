@@ -1,6 +1,9 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer-extra');
 const chromium = require('@sparticuz/chromium');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+puppeteer.use(StealthPlugin());
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,6 +42,9 @@ app.get('/:channel', async (req, res) => {
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
 
+    // إعداد رأس الطلب لتقليد المتصفح العادي
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
+    
     await page.setRequestInterception(true);
     page.on('request', (request) => {
       if (['image', 'stylesheet', 'font', 'media', 'other'].includes(request.resourceType())) {
@@ -49,21 +55,23 @@ app.get('/:channel', async (req, res) => {
     });
 
     let streamingLink = null;
-    const streamingLinkPromise = new Promise((resolve) => {
-      page.on('response', async (response) => {
-        const url = response.url();
-        if (url.includes('.m3u8') && !url.includes('stat.kwikmotion.com')) {
-          resolve(url);
-        }
-      });
+
+    // استخدم on(response) للعثور على الرابط من الاستجابات الواردة
+    page.on('response', async (response) => {
+      const url = response.url();
+      if (url.includes('.m3u8') && !url.includes('stat.kwikmotion.com')) {
+        streamingLink = url;
+      }
     });
 
+    console.log(`Navigating to https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`);
     await page.goto(`https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`, {
-      waitUntil: 'domcontentloaded',
-      timeout: 35000
+      waitUntil: 'networkidle2',
+      timeout: 60000
     });
 
-    streamingLink = await streamingLinkPromise;
+    // الانتظار قليلاً للسماح للروابط بالتحميل
+    await new Promise(resolve => setTimeout(resolve, 10000));
 
     if (streamingLink) {
       console.log('Streaming Link:', streamingLink);
