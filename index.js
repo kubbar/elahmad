@@ -2,7 +2,6 @@ const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const chromium = require('@sparticuz/chromium');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const axios = require('axios');
 
 puppeteer.use(StealthPlugin());
 
@@ -62,8 +61,7 @@ app.get('/:channel', async (req, res) => {
 
     const streamingLink = await streamingLinkPromise;
     if (streamingLink) {
-      const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(streamingLink)}`;
-      return res.status(200).json({ streamingLink: proxyUrl });
+      return res.status(200).json({ streamingLink });
     } else {
       return res.status(404).json({ error: 'No streaming link found' });
     }
@@ -73,23 +71,6 @@ app.get('/:channel', async (req, res) => {
     if (browser) {
       await browser.close();
     }
-  }
-});
-
-app.get('/proxy', async (req, res) => {
-  const targetUrl = decodeURIComponent(req.query.target);
-  try {
-    const response = await axios.get(targetUrl, {
-      headers: {
-        'Referer': 'https://www.elahmad.com',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, مثل Gecko) Chrome/131.0.0.0 Safari/537.36'
-      },
-      responseType: 'stream'
-    });
-    res.setHeader('Content-Type', response.headers['content-type']);
-    response.data.pipe(res);
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
