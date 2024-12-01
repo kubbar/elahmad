@@ -3,14 +3,23 @@ const axios = require('axios');
 const puppeteer = require('puppeteer-extra');
 const chromium = require('@sparticuz/chromium');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 puppeteer.use(StealthPlugin());
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// الحفاظ على جلسة المتصفح
-let browser;
+app.use('/proxy', createProxyMiddleware({
+  target: '',
+  changeOrigin: true,
+  onProxyReq: (proxyReq, req) => {
+    const targetUrl = decodeURIComponent(req.query.target);
+    proxyReq.setHeader('Referer', 'https://www.elahmad.com');
+    proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
+    proxyReq.path = targetUrl;
+  },
+}));
 
 app.get('/:channel', async (req, res) => {
   const { channel } = req.params;
@@ -21,32 +30,30 @@ app.get('/:channel', async (req, res) => {
   }
 
   try {
-    if (!browser) {
-      console.log('Launching browser...');
-      browser = await puppeteer.launch({
-        args: [
-          ...chromium.args,
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-          '--disable-extensions',
-          '--disable-background-networking',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-sync',
-          '--metrics-recording-only',
-          '--mute-audio',
-          '--no-first-run',
-          '--safebrowsing-disable-auto-update'
-        ],
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless,
-      });
+    console.log('Launching browser...');
+    const browser = await puppeteer.launch({
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-background-networking',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-sync',
+        '--metrics-recording-only',
+        '--mute-audio',
+        '--no-first-run',
+        '--safebrowsing-disable-auto-update'
+      ],
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
 
-      console.log('Browser launched.');
-    }
+    console.log('Browser launched.');
 
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
@@ -99,18 +106,7 @@ app.get('/:channel', async (req, res) => {
       const proxyUrl = `${req.protocol}://${req.get('host')}/proxy?target=${encodeURIComponent(decodedStreamingLink)}`;
       console.log('Proxy URL:', proxyUrl);
 
-      // التحقق من صحة الرابط
-      try {
-        const response = await axios.get(proxyUrl);
-        if (response.status === 200) {
-          return res.status(200).json({ streamingLink: proxyUrl });
-        } else {
-          return res.status(404).json({ error: 'Streaming link is invalid' });
-        }
-      } catch (error) {
-        console.error('Error validating streaming link:', error);
-        return res.status(500).json({ error: 'Error validating streaming link' });
-      }
+      return res.status(200).json({ streamingLink: proxyUrl });
     } else {
       console.log('No streaming link found for channel:', channel);
       return res.status(404).json({ error: 'No streaming link found' });
@@ -118,29 +114,6 @@ app.get('/:channel', async (req, res) => {
   } catch (error) {
     console.error('Error in API route:', error);
     return res.status(500).json({ error: 'An error occurred while fetching channel data' });
-  } finally {
-    if (browser) {
-      await browser.close();
-      console.log('Browser closed.');
-    }
-  }
-});
-
-app.get('/proxy', async (req, res) => {
-  const targetUrl = decodeURIComponent(req.query.target);
-  try {
-    const response = await axios.get(targetUrl, {
-      responseType: 'stream',
-      headers: {
-        'Referer': 'https://www.elahmad.com',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36'
-      }
-    });
-    res.setHeader('Content-Type', response.headers['content-type']);
-    response.data.pipe(res);
-  } catch (error) {
-    console.error('Error in proxy route:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
