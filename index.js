@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // استخدام بروكسي ثابت
-const proxy = '34.84.72.11:8561'; // يمكنك تغيير هذا إلى البروكسي الذي تريده
+const proxy = '188.166.47.155:3128'; // يمكنك تغيير هذا إلى البروكسي الذي تريده
 
 app.use('/proxy', createProxyMiddleware({
   target: '',
