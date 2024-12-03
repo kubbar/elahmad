@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // استخدام بروكسي ثابت
-const proxy = '92.113.144.119:8080'; // يمكنك تغيير هذا إلى البروكسي الذي تريده
+const proxy = '92.113.144.119:8080'; // البروكسي الذي جربته ويعمل
 
 app.use('/proxy', createProxyMiddleware({
   target: '',
@@ -60,7 +60,7 @@ app.get('/:channel', async (req, res) => {
     page.setDefaultNavigationTimeout(0);
 
     // إعداد رأس الطلب لتقليد المتصفح العادي
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
     
     await page.setRequestInterception(true);
     page.on('request', (request) => {
