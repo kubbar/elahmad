@@ -9,16 +9,8 @@ puppeteer.use(StealthPlugin());
 const app = express();
 const port = process.env.PORT || 3000;
 
-// قائمة البروكسيات
-const proxies = [
-  '200.174.198.86:8888',
-  '188.166.197.129:3128',
-  '188.166.47.155:3128',
-  '92.113.144.119:8080',
-  '141.145.197.152:8888',
-  '34.84.72.248:8561',
-  '34.84.72.11:8561'
-];
+// استخدام بروكسي ثابت
+const proxy = '34.84.72.11:8561'; // يمكنك تغيير هذا إلى البروكسي الذي تريده
 
 app.use('/proxy', createProxyMiddleware({
   target: '',
@@ -41,9 +33,6 @@ app.get('/:channel', async (req, res) => {
 
   let browser = null;
   try {
-    // اختيار بروكسي عشوائي من القائمة
-    const proxy = proxies[Math.floor(Math.random() * proxies.length)];
-
     browser = await puppeteer.launch({
       args: [
         `--proxy-server=${proxy}`,

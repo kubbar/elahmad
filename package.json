@@ -4,18 +4,17 @@
     "description": "A general-purpose proxy",
     "main": "index.js",
     "scripts": {
-      "start": "node index.js"
+        "start": "node index.js"
     },
     "dependencies": {
-      "chrome-aws-lambda": "*",
-      "express": "*",
-      "puppeteer-core": "*",
-      "puppeteer-extra": "*",
-      "puppeteer-extra-plugin-stealth": "*",
-      "http-proxy-middleware": "*",
-      "@sparticuz/chromium": "*"
+        "@sparticuz/chromium": "^131.0.1",
+        "chrome-aws-lambda": "^10.1.0",
+        "express": "^4.21.1",
+        "http-proxy-middleware": "^3.0.3",
+        "puppeteer-core": "^23.9.0",
+        "puppeteer-extra": "^3.3.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2"
     },
     "author": "",
     "license": "ISC"
-  }
-  
+}
