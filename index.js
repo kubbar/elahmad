@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // استخدام بروكسي ثابت
-const proxy = '188.166.47.155:3128'; // يمكنك تغيير هذا إلى البروكسي الذي تريده
+const proxy = '92.113.144.119:8080'; // يمكنك تغيير هذا إلى البروكسي الذي تريده
 
 app.use('/proxy', createProxyMiddleware({
   target: '',
@@ -84,11 +84,11 @@ app.get('/:channel', async (req, res) => {
     console.log(`Navigating to https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`);
     await page.goto(`https://www.elahmad.com/tv/mobiletv/glarb.php?id=${channel}`, {
       waitUntil: 'networkidle2',
-      timeout: 60000
+      timeout: 120000 // زيادة وقت الانتظار إلى 120 ثانية
     });
 
     // الانتظار قليلاً للسماح للروابط بالتحميل
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 20000)); // زيادة التأخير إلى 20 ثانية
 
     if (streamingLink) {
       console.log('Streaming Link:', streamingLink);
