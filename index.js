@@ -1,7 +1,6 @@
 const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const chromium = require('@sparticuz/chromium');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 puppeteer.use(StealthPlugin());
@@ -36,7 +35,6 @@ app.get('/:channel', async (req, res) => {
     browser = await puppeteer.launch({
       args: [
         `--proxy-server=${proxy}`,
-        ...chromium.args,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
@@ -52,15 +50,14 @@ app.get('/:channel', async (req, res) => {
         '--no-first-run',
         '--safebrowsing-disable-auto-update'
       ],
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: true,
     });
 
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(0);
 
     // إعداد رأس الطلب لتقليد المتصفح العادي
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
     
     await page.setRequestInterception(true);
     page.on('request', (request) => {
