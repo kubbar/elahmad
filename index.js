@@ -1,6 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const chromium = require('@sparticuz/chromium');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 puppeteer.use(StealthPlugin());
@@ -32,9 +33,12 @@ app.get('/:channel', async (req, res) => {
 
   let browser = null;
   try {
+    const executablePath = await chromium.executablePath;
+
     browser = await puppeteer.launch({
       args: [
         `--proxy-server=${proxy}`,
+        ...chromium.args,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
@@ -50,6 +54,7 @@ app.get('/:channel', async (req, res) => {
         '--no-first-run',
         '--safebrowsing-disable-auto-update'
       ],
+      executablePath: executablePath,
       headless: true,
     });
 
