@@ -31,9 +31,14 @@ app.get('/:channel', async (req, res) => {
     return res.status(400).json({ error: 'Channel parameter is required' });
   }
 
+  // تجاهل طلب favicon.ico
+  if (channel === 'favicon.ico') {
+    return res.status(204).end();
+  }
+
   let browser = null;
   try {
-    const executablePath = await chromium.executablePath();
+    const executablePath = await chromium.executablePath;
 
     browser = await puppeteer.launch({
       args: [

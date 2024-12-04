@@ -7,13 +7,13 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@sparticuz/chromium": "^111.0.0",
-    "chrome-aws-lambda": "^10.1.0",
-    "express": "^4.21.1",
-    "http-proxy-middleware": "^2.0.7",
-    "puppeteer-core": "^10.4.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "chrome-aws-lambda": "*",
+    "express": "*",
+    "puppeteer-core": "*",
+    "puppeteer-extra": "*",
+    "puppeteer-extra-plugin-stealth": "*",
+    "http-proxy-middleware": "*",
+    "@sparticuz/chromium": "*"
   },
   "author": "",
   "license": "ISC"
