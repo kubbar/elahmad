@@ -33,7 +33,7 @@ app.get('/:channel', async (req, res) => {
 
   let browser = null;
   try {
-    const executablePath = await chromium.executablePath;
+    const executablePath = await chromium.executablePath();
 
     browser = await puppeteer.launch({
       args: [
@@ -54,7 +54,7 @@ app.get('/:channel', async (req, res) => {
         '--no-first-run',
         '--safebrowsing-disable-auto-update'
       ],
-      executablePath: executablePath(),
+      executablePath: executablePath,
       headless: chromium.headless,
     });
 
