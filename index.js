@@ -3,6 +3,7 @@ const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const chromium = require('@sparticuz/chromium');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const awsLambda = require('chrome-aws-lambda');
 
 puppeteer.use(StealthPlugin());
 
@@ -38,29 +39,14 @@ app.get('/:channel', async (req, res) => {
 
   let browser = null;
   try {
-    const executablePath = await chromium.executablePath;
+    const executablePath = await awsLambda.executablePath;
+    const args = [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'];
 
     browser = await puppeteer.launch({
-      args: [
-        `--proxy-server=${proxy}`,
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--disable-extensions',
-        '--disable-background-networking',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-sync',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-first-run',
-        '--safebrowsing-disable-auto-update'
-      ],
-      executablePath: executablePath,
+      args,
+      executablePath,
       headless: chromium.headless,
+      defaultViewport: chromium.defaultViewport,
     });
 
     const page = await browser.newPage();
