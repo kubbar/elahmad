@@ -18,7 +18,7 @@ app.use('/proxy', createProxyMiddleware({
   onProxyReq: (proxyReq, req) => {
     const targetUrl = decodeURIComponent(req.query.target);
     proxyReq.setHeader('Referer', 'https://www.elahmad.com');
-    proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
+    proxyReq.setHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
     proxyReq.path = targetUrl;
   },
   router: (req) => decodeURIComponent(req.query.target),
@@ -54,7 +54,7 @@ app.get('/:channel', async (req, res) => {
         '--no-first-run',
         '--safebrowsing-disable-auto-update'
       ],
-      executablePath: executablePath,
+      executablePath: executablePath(),
       headless: chromium.headless,
     });
 
@@ -62,7 +62,7 @@ app.get('/:channel', async (req, res) => {
     page.setDefaultNavigationTimeout(0);
 
     // إعداد رأس الطلب لتقليد المتصفح العادي
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML، مثل Gecko) Chrome/131.0.0.0 Safari/537.36');
     
     await page.setRequestInterception(true);
     page.on('request', (request) => {
